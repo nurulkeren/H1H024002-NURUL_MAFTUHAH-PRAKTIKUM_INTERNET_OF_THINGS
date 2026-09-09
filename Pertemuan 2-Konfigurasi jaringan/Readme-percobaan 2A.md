@@ -205,7 +205,7 @@ terhubung ke jaringan WiFi.
 +------------------+
 
    2. Apa fungsi dari perintah WiFi.mode(WIFI_STA) pada program tersebut?<br>
-      WiFi.mode(WIFI_STA) berfungsi untuk mengatur ESP32 agar bekerja dalam mode Station (STA). Pada mode ini, ESP32 berperan sebagai perangkat/klien yang terhubung ke jaringan        WiFi yang sudah tersedia, seperti hotspot smartphone atau router
+      WiFi.mode(WIFI_STA) berfungsi untuk mengatur ESP32 agar bekerja dalam mode Station (STA).</br> Pada mode ini, ESP32 berperan sebagai perangkat/klien yang terhubung ke jaringan        WiFi yang sudah tersedia, seperti hotspot smartphone atau router
    3. Jelaskan apa yang terjadi apabila SSID atau password yang dimasukkan salah! <br>
       Apabila SSID atau password yang dimasukkan salah, ESP32 tidak dapat terhubung ke jaringan WiFi. Pada program, kondisi ini menyebabkan WiFi.status() tidak menjadi                 WL_CONNECTED, sehingga program akan terus berada di dalam perulangan while dan mencoba menunggu koneksi. Serial Monitor akan menampilkan pesan "Menghubungkan ke WiFi"            secara terus-menerus, sedangkan bagian untuk menampilkan IP Address, MAC Address, RSSI, dan menyalakan LED tidak akan dijalankan
    4. Modifikasi program agar ESP32 mencoba menghubungkan ulang (reconnect) secara otomatis apabila koneksi WiFi terputus, dan berikan penjelasan di setiap baris kode <br>
