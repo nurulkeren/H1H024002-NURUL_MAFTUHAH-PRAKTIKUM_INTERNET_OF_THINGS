@@ -1,4 +1,4 @@
-# Praktikum WiFi ESP32
+# modul 2 konfigurasi jaringan 
 
 ## 1. Detail Percobaan
 
