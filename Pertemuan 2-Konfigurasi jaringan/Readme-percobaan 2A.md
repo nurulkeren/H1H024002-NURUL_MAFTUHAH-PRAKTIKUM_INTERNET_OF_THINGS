@@ -143,30 +143,67 @@ while (WiFi.status() != WL_CONNECTED) {
 Perulangan tersebut membuat ESP32 terus menunggu sampai berhasil
 terhubung ke jaringan WiFi.
 ## 6. Jawaban Pertanyaan Praktikum 2A
-1. Gambarkan diagram alur (flowchart) proses koneksi ESP32 ke jaringan WiFi pada program di atas!<br>
-   
-   Mulai
-  ↓
-Inisialisasi Serial dan LED
-  ↓
-LED OFF
-  ↓
-Atur WiFi menjadi STA
-  ↓
-Hubungkan ke WiFi
-  ↓
-Berhasil terhubung?
-  ├── Tidak → Tunggu 500 ms → Cek kembali
-  │
-  └── Ya → Tampilkan IP, MAC, dan RSSI
-              ↓
-           LED ON
-              ↓
-        Cek status WiFi
-              ↓
-         Tunggu 5 detik
-              ↓
-            Ulangi
+
+### 1. Diagram Alur (Flowchart) Proses Koneksi ESP32 ke Jaringan WiFi
+
+```text
+       +-----------------------+
+       |         Mulai         |
+       +-----------+-----------+
+                   |
+                   v
+  +---------------------------------+
+  |    Inisialisasi Serial & LED    |
+  +----------------+----------------+
+                   |
+                   v
+       +-----------------------+
+       |        LED OFF        |
+       +-----------+-----------+
+                   |
+                   v
+       +-----------------------+
+       |   Atur WiFi ke STA    |
+       +-----------+-----------+
+                   |
+                   v
+       +-----------------------+
+       |   Hubungkan ke WiFi   |
+       +-----------+-----------+
+                   |
+                   v
+         /-------------------\
+        /  Berhasil Terhubung? \
+        \                      /
+         \--------------------/
+           |                |
+        Ya |                | Tidak
+           v                v
++------------------+  +-------------------+
+| Tampilkan Info   |  |   Tunggu 500 ms   |
+| IP, MAC, & RSSI  |  +---------+---------+
++--------+---------+            |
+         |                      v
+         v            +-------------------+
++------------------+  |    Cek Kembali    |
+|      LED ON      |  +-------------------+
++--------+---------+
+         |
+         v
++------------------+
+| Cek Status WiFi  | <------+
++--------+---------+        |
+         |                  |
+         v                  |
++------------------+        |
+|  Tunggu 5 Detik  |        |
++--------+---------+        |
+         |                  |
+         v                  |
++------------------+        |
+|     Ulangi       | -------+
++------------------+
+
    2. Apa fungsi dari perintah WiFi.mode(WIFI_STA) pada program tersebut?<br>
       WiFi.mode(WIFI_STA) berfungsi untuk mengatur ESP32 agar bekerja dalam mode Station (STA). Pada mode ini, ESP32 berperan sebagai perangkat/klien yang terhubung ke jaringan        WiFi yang sudah tersedia, seperti hotspot smartphone atau router
    3. Jelaskan apa yang terjadi apabila SSID atau password yang dimasukkan salah! <br>
@@ -266,5 +303,5 @@ Berhasil terhubung?
 ## 7. penjelasan detail percobaan
 Pada percobaan ini, ESP32 dikonfigurasi sebagai Station (STA) untuk terhubung ke jaringan WiFi yang tersedia. ESP32 menggunakan SSID TECNOPOVA6 dan password hurufbesar. Setelah berhasil terhubung, informasi berupa IP Address, MAC Address, dan RSSI ditampilkan melalui Serial Monitor. LED pada GPIO 2 digunakan sebagai indikator keberhasilan koneksi, yaitu menyala ketika ESP32 berhasil terhubung ke WiFi.
 ## 8. foto percobaan
-link: 
+link: https://drive.google.com/drive/folders/1bQNmdO6_lQoJMbp50PNAGneGszcxOYip?usp=drive_link
       
