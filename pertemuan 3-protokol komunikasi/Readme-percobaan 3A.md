@@ -296,27 +296,78 @@ Contoh kode lainnya adalah:
 - `500` → terjadi kesalahan pada server.
 
 ### 4. Modifikasi program agar ESP32 dapat mengirimkan data tambahan berupa waktu menggunakan `millis()`.
-
-Tambahkan data berikut setelah data suhu dan kelembaban:
-
 ```cpp
-// Menambahkan waktu sejak ESP32 dinyalakan
-doc["waktu"] = millis();
-```
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
 
-Baris tersebut mengambil nilai waktu dalam milidetik sejak ESP32 mulai dijalankan dan memasukkannya ke dalam objek JSON dengan key `waktu`.
+const char* ssid = "NAMA_WIFI";
+const char* password = "PASSWORD_WIFI";
 
-Contoh JSON yang dikirim:
+const char* server = "https://httpbin.org/post";
 
-```json
-{
-  "suhu": 28.5,
-  "kelembaban": 65.0,
-  "waktu": 12345
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+
+  Serial.print("Menghubungkan ke WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.println("WiFi terhubung!");
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+
+    HTTPClient http;
+    http.begin(server);
+
+    // Menentukan header bahwa data yang dikirim berupa JSON
+    http.addHeader("Content-Type", "application/json");
+
+    // Membuat data JSON
+    StaticJsonDocument<200> doc;
+
+    doc["suhu"] = 28.5;
+    doc["kelembaban"] = 65;
+    doc["waktu"] = millis(); // Menambahkan waktu sejak ESP32 mulai menyala
+
+    // Mengubah JSON menjadi String
+    String jsonData;
+    serializeJson(doc, jsonData);
+
+    Serial.println("Data yang dikirim:");
+    Serial.println(jsonData);
+
+    // Mengirim data menggunakan HTTP POST
+    int httpResponseCode = http.POST(jsonData);
+
+    Serial.print("HTTP Response Code: ");
+    Serial.println(httpResponseCode);
+
+    if (httpResponseCode > 0) {
+      String response = http.getString();
+
+      Serial.println("Response:");
+      Serial.println(response);
+    } else {
+      Serial.println("Gagal mengirim data!");
+    }
+
+    http.end();
+
+  } else {
+    Serial.println("WiFi tidak terhubung!");
+  }
+
+  delay(10000);
 }
 ```
-
----
 
 ## 9. Hasil Percobaan
 
