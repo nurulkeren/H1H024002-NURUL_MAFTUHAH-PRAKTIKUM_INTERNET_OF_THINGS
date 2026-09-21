@@ -45,8 +45,8 @@ Library yang diperlukan:
 #include <ArduinoJson.h>
 
 // Menentukan nama jaringan WiFi dan password
-const char* ssid = "NAMA_WIFI_ANDA";
-const char* password = "PASSWORD_WIFI_ANDA";
+const char* ssid = "TECNOPOVA6";
+const char* password = "hurufbesar";
 
 // Menentukan alamat server yang digunakan untuk pengujian HTTP POST
 const char* serverUrl = "https://httpbin.org/post";
@@ -301,8 +301,8 @@ Contoh kode lainnya adalah:
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "NAMA_WIFI";
-const char* password = "PASSWORD_WIFI";
+const char* ssid = "TECNOPOVA6";
+const char* password = "hurufbesar";
 
 const char* server = "https://httpbin.org/post";
 
@@ -405,3 +405,6 @@ Selama 10 kali pengiriman dari detik 0 sampai 90, tidak terdapat pengiriman yang
 ## 11. Kesimpulan
 
 Percobaan komunikasi data menggunakan HTTP berhasil dilakukan. ESP32 dapat mengirimkan data JSON berupa suhu dan kelembaban ke server menggunakan metode HTTP POST secara berkala setiap 10 detik. Seluruh pengiriman mendapatkan response code 200 dan data dapat diterima oleh server dengan baik.
+
+## 12. foto percobaan
+link:  https://drive.google.com/drive/folders/1bQNmdO6_lQoJMbp50PNAGneGszcxOYip?usp=drive_link
