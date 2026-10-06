@@ -393,14 +393,14 @@ void loop() {
 
 }
 ```
-a. Inisialisasi Library
+###a. Inisialisasi Library
 Pada bagian awal program terdapat tiga library utama yaitu WiFi.h, PubSubClient.h, dan ArduinoJson.h. Library WiFi.h digunakan agar ESP32 dapat terhubung dengan jaringan internet. Library PubSubClient.h digunakan untuk menjalankan komunikasi MQTT seperti melakukan koneksi, subscribe topic, dan menerima pesan dari broker. Sedangkan library ArduinoJson.h digunakan untuk melakukan proses deserialisasi data JSON yang diterima dari MQTT menjadi data yang dapat dibaca oleh program.
-b. Konfigurasi WiFi dan MQTT
+###b. Konfigurasi WiFi dan MQTT
 Program menentukan nama WiFi, password, alamat broker MQTT, port komunikasi, serta topic yang digunakan untuk menerima perintah. Topic harus dibuat sama antara ESP32 dan aplikasi MQTT Explorer agar pesan dapat diterima oleh perangkat.
-c. Fungsi Callback
+###c. Fungsi Callback
 Fungsi callback() merupakan fungsi utama pada mekanisme subscribe MQTT. Fungsi ini akan berjalan secara otomatis ketika broker menerima pesan baru pada topic yang telah didaftarkan. Data yang diterima dalam bentuk byte kemudian diubah menjadi String agar dapat diproses sebagai format JSON.
 Mekanisme callback dan penggunaan client.subscribe(topic) merupakan bagian utama dari proses subscribe MQTT karena perangkat hanya menunggu pesan masuk dari topic tertentu.     Modul Praktikum IoT 4 - Komunik…
-d. Proses Deserialisasi JSON
+###d. Proses Deserialisasi JSON
 Data JSON yang diterima kemudian diproses menggunakan fungsi deserializeJson(). Proses ini mengubah data teks JSON menjadi object yang dapat diakses berdasarkan key tertentu.
 Contoh data yang dikirim melalui MQTT Explorer:
 ```cpp
@@ -413,7 +413,7 @@ Setelah proses deserialisasi berhasil, nilai "ON" dapat diambil menggunakan:
 doc["perintah"]
 ```
 Kemudian nilai tersebut digunakan untuk menentukan kondisi LED.
-e. Kendali LED
+###e. Kendali LED
 Jika nilai perintah adalah "ON", maka ESP32 memberikan logika HIGH pada pin LED sehingga LED menyala. Sebaliknya jika nilai perintah adalah "OFF", maka ESP32 memberikan logika LOW sehingga LED mati.
-f. Fungsi client.loop()
+###f. Fungsi client.loop()
 Pada bagian loop(), fungsi client.loop() harus dijalankan secara terus menerus agar ESP32 tetap dapat memeriksa pesan MQTT yang masuk dan menjaga koneksi dengan broker. Modul juga menjelaskan bahwa fungsi loop MQTT harus dipanggil secara berkala agar perangkat tetap responsif terhadap pesan baru.
