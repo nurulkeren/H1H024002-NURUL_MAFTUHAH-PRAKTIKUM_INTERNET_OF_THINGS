@@ -23,14 +23,14 @@ Library yang diperlukan:
 #include <DHT.h>
 ```
 ### Fungsi Library:
-``` text
+
 | Library | Fungsi |
 |---|---|
 | `WiFi.h` | Digunakan untuk menghubungkan ESP32 dengan jaringan WiFi |
 | `PubSubClient.h` | Digunakan untuk komunikasi MQTT publish dan subscribe |
 | `ArduinoJson.h` | Digunakan untuk membuat dan melakukan parsing data JSON |
 | `DHT.h` | Digunakan untuk membaca data suhu dari sensor DHT11 |
-```
+
 ## Penjelasan Program
 (Kode lengkap nanti dimasukkan di bagian ini, mengikuti kode yang kamu gunakan pada screenshot: DHT11 + publish JSON + subscribe LED)
 Struktur program:
@@ -60,7 +60,7 @@ ESP32 terhubung MQTT Broker
         Kendali LED
 ```
 ## 4. Penjelasan Tiap Fungsi
-```text
+
 | No | Fungsi / Bagian Kode | Penjelasan |
 |---|---|---|
 | 1 | `WiFi.h` | Library untuk menghubungkan ESP32 dengan jaringan WiFi. |
@@ -78,9 +78,9 @@ ESP32 terhubung MQTT Broker
 | 13 | `deserializeJson()` | Mengubah data JSON yang diterima menjadi object yang dapat diproses ESP32. |
 | 14 | `client.loop()` | Menjaga koneksi MQTT dan mengecek pesan baru yang masuk. |
 | 15 | `millis()` | Digunakan untuk mengatur interval pengiriman data tanpa menghentikan program utama. |
-```
+
 ## 5. Penjelasan Percabangan dan Conditional
-```text
+
 | No | Percabangan / Conditional | Penjelasan |
 |---|---|---|
 | 1 | `if (!client.connected())` | Mengecek apakah ESP32 masih terhubung dengan broker MQTT. Jika terputus, ESP32 melakukan koneksi ulang. |
@@ -88,7 +88,7 @@ ESP32 terhubung MQTT Broker
 | 3 | `if (String(perintah) == "ON")` | Mengecek apakah perintah yang diterima adalah ON sehingga LED dinyalakan. |
 | 4 | `else if (String(perintah) == "OFF")` | Mengecek apakah perintah yang diterima adalah OFF sehingga LED dimatikan. |
 | 5 | `while (!client.connected())` | Melakukan percobaan koneksi ulang hingga ESP32 berhasil terhubung dengan MQTT broker. |
-```
+
 ## 6. Jawaban Pertanyaan Praktikum
 ### 1. Jelaskan perbedaan komunikasi satu arah dan dua arah pada MQTT!
 Jawaban:
