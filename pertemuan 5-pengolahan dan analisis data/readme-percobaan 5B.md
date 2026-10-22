@@ -457,14 +457,5 @@ Dengan demikian, percobaan ini memberikan pemahaman mengenai tahapan pengolahan 
 ---
 
 # 10. Foto Percobaan
-
-Dokumentasi yang dapat ditambahkan pada bagian ini meliputi:
-
-1. Tampilan kode program `modul5_analisis_data.py`.
-2. Tampilan terminal ketika program dijalankan.
-3. Tampilan data simulasi yang digunakan untuk pengujian.
-4. Isi file `data_suhu.csv`.
-5. Grafik hasil analisis `grafik_suhu.png`.
-
-**Catatan:** gunakan tangkapan layar hasil pengujian yang benar-benar dilakukan. Jika pengujian dilakukan dengan data dummy secara lokal, jelaskan bahwa data tersebut merupakan simulasi dan jangan menyatakan koneksi MQTT atau pembacaan sensor berhasil apabila bagian tersebut belum diuji.
+link: https://drive.google.com/drive/folders/1bQNmdO6_lQoJMbp50PNAGneGszcxOYip?usp=drive_link
 
