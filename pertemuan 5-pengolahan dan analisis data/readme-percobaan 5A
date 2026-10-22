@@ -1,1 +1,386 @@
+# Modul 5 - Percobaan 5A
+# Pengolahan Data Sensor pada ESP32 (Moving Average dan Statistik)
+
+## 1. Detail Percobaan
+
+Percobaan 5A membahas pengolahan data sensor pada perangkat ESP32 menggunakan metode *edge processing*. Program dirancang untuk membaca data suhu dari sensor DHT22, menghitung nilai rata-rata bergerak (*moving average*) dari lima pembacaan terakhir, serta mencatat nilai suhu minimum dan maksimum selama program berjalan.
+
+Pada percobaan ini, sensor DHT22 tidak tersedia sehingga pengujian dilakukan menggunakan data dummy atau simulasi suhu. Data simulasi digunakan untuk menguji logika perhitungan moving average, pembaruan nilai minimum dan maksimum, serta penampilan hasil pengolahan data pada Serial Monitor.
+
+### Spesifikasi yang Diharapkan
+
+1. Program dapat memproses data suhu secara berkala.
+2. Program menghitung moving average dari lima pembacaan terakhir.
+3. Program mencatat nilai suhu minimum dan maksimum.
+4. Program dapat mengabaikan data yang tidak valid.
+5. Serial Monitor menampilkan data mentah, hasil filter, nilai minimum, dan nilai maksimum.
+6. Logika program berjalan sesuai dengan spesifikasi menggunakan data simulasi.
+
+---
+
+# 2. Library / Dependencies
+
+Library yang diperlukan untuk program asli Percobaan 5A:
+
+```cpp
+#include <DHT.h>
+```
+
+### Fungsi Library
+
+| Library | Fungsi |
+|---|---|
+| `DHT.h` | Digunakan untuk membaca data suhu dari sensor DHT22. |
+
+Library DHT harus dipasang melalui Library Manager pada Arduino IDE apabila program dijalankan menggunakan sensor fisik.
+
+Karena sensor DHT22 tidak tersedia, pengujian dilakukan dengan data dummy. Data simulasi dapat digunakan untuk menguji bagian perhitungan tanpa melakukan pembacaan suhu dari sensor fisik.
+
+---
+
+# 3. Penjelasan Program
+
+## A. Inisialisasi Library dan Sensor
+
+```cpp
+#include <DHT.h>
+
+#define DHTPIN 4
+#define DHTTYPE DHT22
+
+DHT dht(DHTPIN, DHTTYPE);
+```
+
+Penjelasan:
+
+- `#include <DHT.h>` digunakan untuk memanggil library DHT.
+- `#define DHTPIN 4` menentukan GPIO 4 sebagai pin data sensor.
+- `#define DHTTYPE DHT22` menentukan jenis sensor yang digunakan.
+- `DHT dht(DHTPIN, DHTTYPE)` membuat objek sensor bernama `dht`.
+
+Pada pengujian menggunakan data dummy, bagian pembacaan sensor perlu diganti dengan nilai simulasi agar program tidak bergantung pada perangkat DHT22.
+
+## B. Deklarasi Variabel Moving Average
+
+```cpp
+const int N = 5;               // jumlah sampel moving average
+float buffer[N];               // menyimpan N pembacaan terakhir
+int indeks = 0;                // posisi penulisan berikutnya pada buffer
+int jumlah = 0;                // jumlah sampel yang sudah terisi
+
+float suhuMin = 1000.0;
+float suhuMax = -1000.0;
+```
+
+Penjelasan:
+
+- `N = 5` menentukan jumlah data yang digunakan untuk perhitungan moving average.
+- `buffer[N]` menyimpan data suhu yang akan dihitung rata-ratanya.
+- `indeks` menentukan posisi penyimpanan data berikutnya.
+- `jumlah` mencatat banyaknya data yang sudah dimasukkan ke buffer.
+- `suhuMin` menyimpan nilai suhu minimum.
+- `suhuMax` menyimpan nilai suhu maksimum.
+
+Nilai awal `suhuMin` dibuat besar agar mudah diperbarui oleh pembacaan suhu pertama, sedangkan `suhuMax` dibuat kecil agar nilai suhu pertama dapat menjadi nilai maksimum awal.
+
+## C. Fungsi hitungMovingAverage()
+
+```cpp
+float hitungMovingAverage(float nilaiBaru) {
+    buffer[indeks] = nilaiBaru;
+    indeks = (indeks + 1) % N;
+    if (jumlah < N) jumlah++;
+
+    float total = 0;
+    for (int i = 0; i < jumlah; i++) {
+        total += buffer[i];
+    }
+
+    return total / jumlah;
+}
+```
+
+Penjelasan:
+
+1. `float hitungMovingAverage(float nilaiBaru)` membuat fungsi untuk menghitung rata-rata bergerak berdasarkan data baru.
+2. `buffer[indeks] = nilaiBaru` menyimpan nilai baru ke dalam buffer.
+3. `indeks = (indeks + 1) % N` memindahkan indeks ke posisi berikutnya dan mengulang ke awal ketika mencapai batas buffer.
+4. `if (jumlah < N) jumlah++` menambah jumlah data yang sudah tersimpan selama buffer belum penuh.
+5. `float total = 0` menyiapkan variabel untuk menjumlahkan data.
+6. `for (int i = 0; i < jumlah; i++)` mengulangi proses untuk setiap data yang tersimpan.
+7. `total += buffer[i]` menjumlahkan nilai pada buffer.
+8. `return total / jumlah` menghasilkan rata-rata dari data yang tersedia.
+
+Fungsi ini menghaluskan perubahan data suhu agar fluktuasi kecil tidak langsung terlalu memengaruhi nilai hasil filter.
+
+## D. Fungsi setup()
+
+```cpp
+void setup() {
+    Serial.begin(115200);
+    dht.begin();
+}
+```
+
+Penjelasan:
+
+- `void setup()` dijalankan satu kali saat ESP32 mulai bekerja.
+- `Serial.begin(115200)` mengaktifkan komunikasi Serial Monitor dengan baud rate 115200.
+- `dht.begin()` menginisialisasi sensor DHT22.
+
+Jika program menggunakan data dummy sepenuhnya, inisialisasi `dht.begin()` tidak diperlukan untuk proses simulasi.
+
+## E. Fungsi loop()
+
+```cpp
+void loop() {
+    float suhu = dht.readTemperature();
+
+    if (isnan(suhu)) {
+        Serial.println("Pembacaan gagal, data diabaikan");
+    } else {
+        float suhuFilter = hitungMovingAverage(suhu);
+
+        if (suhu < suhuMin) suhuMin = suhu;
+        if (suhu > suhuMax) suhuMax = suhu;
+
+        Serial.print("Mentah: ");
+        Serial.print(suhu);
+        Serial.print(" | Filter: ");
+        Serial.print(suhuFilter);
+        Serial.print(" | Min: ");
+        Serial.print(suhuMin);
+        Serial.print(" | Max: ");
+        Serial.println(suhuMax);
+    }
+
+    delay(2000);
+}
+```
+
+Penjelasan:
+
+- `void loop()` merupakan fungsi yang dijalankan berulang kali selama ESP32 aktif.
+- `dht.readTemperature()` membaca suhu dari sensor dalam satuan Celsius.
+- `isnan(suhu)` memeriksa apakah pembacaan menghasilkan nilai tidak valid.
+- `hitungMovingAverage(suhu)` menghitung rata-rata bergerak dari data suhu.
+- `if (suhu < suhuMin)` memperbarui suhu minimum jika ditemukan nilai yang lebih rendah.
+- `if (suhu > suhuMax)` memperbarui suhu maksimum jika ditemukan nilai yang lebih tinggi.
+- `Serial.print()` menampilkan data mentah, hasil filter, nilai minimum, dan nilai maksimum.
+- `delay(2000)` memberikan jeda dua detik sebelum pengulangan berikutnya.
+
+Untuk pengujian dengan data dummy, baris `dht.readTemperature()` diganti dengan nilai simulasi yang sudah ditentukan.
+
+---
+
+# 4. Penjelasan Tiap Fungsi
+
+| No. | Fungsi / Bagian Kode | Penjelasan |
+|---|---|---|
+| 1 | `#include <DHT.h>` | Memanggil library untuk membaca sensor DHT. |
+| 2 | `#define DHTPIN 4` | Menentukan pin data sensor pada GPIO 4. |
+| 3 | `#define DHTTYPE DHT22` | Menentukan jenis sensor DHT22. |
+| 4 | `DHT dht(DHTPIN, DHTTYPE)` | Membuat objek sensor bernama `dht`. |
+| 5 | `const int N = 5` | Menentukan ukuran jendela moving average sebanyak lima data. |
+| 6 | `float buffer[N]` | Menyimpan data suhu yang digunakan untuk menghitung rata-rata. |
+| 7 | `indeks` | Menentukan posisi penyimpanan data selanjutnya. |
+| 8 | `jumlah` | Menghitung banyaknya sampel yang tersedia di buffer. |
+| 9 | `suhuMin` | Menyimpan suhu terendah yang ditemukan. |
+| 10 | `suhuMax` | Menyimpan suhu tertinggi yang ditemukan. |
+| 11 | `hitungMovingAverage()` | Menghitung rata-rata data yang tersimpan dalam buffer. |
+| 12 | `buffer[indeks] = nilaiBaru` | Memasukkan data baru ke buffer. |
+| 13 | `(indeks + 1) % N` | Mengatur indeks agar kembali ke awal setelah mencapai batas buffer. |
+| 14 | `for` | Mengulangi penjumlahan setiap data yang tersimpan. |
+| 15 | `return total / jumlah` | Mengembalikan hasil rata-rata. |
+| 16 | `setup()` | Melakukan inisialisasi awal program. |
+| 17 | `Serial.begin(115200)` | Mengaktifkan komunikasi Serial Monitor. |
+| 18 | `dht.begin()` | Menginisialisasi sensor DHT22. |
+| 19 | `loop()` | Menjalankan proses utama secara berulang. |
+| 20 | `dht.readTemperature()` | Membaca data suhu dari sensor fisik. |
+| 21 | `isnan(suhu)` | Memeriksa apakah data suhu tidak valid. |
+| 22 | `hitungMovingAverage(suhu)` | Menghasilkan nilai suhu yang sudah difilter. |
+| 23 | `Serial.print()` | Menampilkan informasi ke Serial Monitor. |
+| 24 | `delay(2000)` | Memberikan jeda dua detik antarpembacaan. |
+
+---
+
+# 5. Penjelasan Percabangan dan Perulangan
+
+Program menggunakan struktur percabangan dan perulangan untuk memproses data suhu.
+
+| No. | Struktur | Penjelasan |
+|---|---|---|
+| 1 | `if (jumlah < N)` | Memastikan jumlah sampel tidak melebihi kapasitas buffer saat proses pengisian awal. |
+| 2 | `for (int i = 0; i < jumlah; i++)` | Menjumlahkan seluruh data yang sudah tersimpan di buffer. |
+| 3 | `if (isnan(suhu))` | Memeriksa apakah pembacaan suhu tidak valid. |
+| 4 | `else` | Menjalankan perhitungan jika pembacaan suhu valid. |
+| 5 | `if (suhu < suhuMin)` | Memeriksa apakah suhu baru lebih rendah daripada suhu minimum sebelumnya. |
+| 6 | `if (suhu > suhuMax)` | Memeriksa apakah suhu baru lebih tinggi daripada suhu maksimum sebelumnya. |
+| 7 | `void loop()` | Menjalankan pembacaan dan pengolahan data secara berulang. |
+
+Pada pengujian menggunakan data dummy, nilai simulasi yang valid diproses dengan cara yang sama seperti nilai suhu yang dibaca dari sensor. Dengan demikian, perhitungan moving average serta pembaruan nilai minimum dan maksimum dapat diuji tanpa sensor fisik.
+
+---
+
+# 6. Jawaban Pertanyaan Praktikum
+
+## 1. Gambarkan diagram alur (flowchart) proses perhitungan moving average pada fungsi hitungMovingAverage()!
+
+```text
+              ┌────────────────┐
+              │     MULAI      │
+              └───────┬────────┘
+                      │
+                      v
+          ┌────────────────────────┐
+          │ Menerima nilaiBaru     │
+          └────────────┬───────────┘
+                       │
+                       v
+          ┌────────────────────────┐
+          │ Simpan nilai ke buffer │
+          └────────────┬───────────┘
+                       │
+                       v
+          ┌────────────────────────┐
+          │ Perbarui indeks        │
+          │ (indeks + 1) % N        │
+          └────────────┬───────────┘
+                       │
+                       v
+              ◇────────────────◇
+             ╱ jumlah < N ?     ╲
+            ◇──────────────────◇
+               │           │
+              Ya          Tidak
+               │           │
+               v           │
+          ┌────────────┐    │
+          │ jumlah++  │    │
+          └─────┬──────┘    │
+                └─────┬─────┘
+                      │
+                      v
+          ┌────────────────────────┐
+          │ total = 0              │
+          └────────────┬───────────┘
+                       │
+                       v
+          ┌────────────────────────┐
+          │ Jumlahkan data buffer  │
+          │ menggunakan perulangan │
+          └────────────┬───────────┘
+                       │
+                       v
+          ┌────────────────────────┐
+          │ Hitung total / jumlah  │
+          └────────────┬───────────┘
+                       │
+                       v
+          ┌────────────────────────┐
+          │ Kembalikan nilai rata- │
+          │ rata bergerak          │
+          └────────────┬───────────┘
+                       │
+                       v
+              ┌────────────────┐
+              │    SELESAI     │
+              └────────────────┘
+```
+
+## 2. Jelaskan fungsi operasi `(indeks + 1) % N` pada program tersebut!
+
+Operasi `(indeks + 1) % N` digunakan untuk memindahkan posisi indeks ke lokasi berikutnya pada buffer. Operator `%` merupakan operator modulo yang menghasilkan sisa pembagian.
+
+Karena ukuran buffer adalah lima, indeks akan bergerak dari 0 sampai 4. Ketika indeks mencapai 4, penambahan satu menghasilkan 5, kemudian `5 % 5` menghasilkan 0. Dengan demikian, indeks kembali ke posisi awal sehingga buffer dapat digunakan secara berulang.
+
+## 3. Apa dampaknya apabila nilai N diperbesar menjadi 20 atau diperkecil menjadi 2?
+
+Jika nilai N diperbesar menjadi 20, moving average menggunakan lebih banyak data sehingga hasil filter cenderung lebih halus. Namun, perubahan suhu yang sebenarnya akan lebih lambat terlihat pada hasil filter.
+
+Sebaliknya, jika N diperkecil menjadi 2, hasil filter lebih cepat merespons perubahan suhu, tetapi lebih mudah terpengaruh oleh fluktuasi atau noise.
+
+Jadi, pemilihan N harus mempertimbangkan keseimbangan antara kehalusan data dan kecepatan respons sistem.
+
+## 4. Modifikasi program agar ESP32 juga menghitung simpangan baku dari data pada buffer!
+
+Simpangan baku digunakan untuk mengukur seberapa jauh data menyebar dari nilai rata-ratanya. Untuk menghitung simpangan baku dari data yang tersimpan di buffer, fungsi berikut dapat ditambahkan.
+
+```cpp
+float hitungSimpanganBaku() {
+    if (jumlah < 2) return 0.0;
+
+    float total = 0;
+    for (int i = 0; i < jumlah; i++) {
+        total += buffer[i];
+    }
+
+    float rataRata = total / jumlah;
+    float jumlahKuadrat = 0;
+
+    for (int i = 0; i < jumlah; i++) {
+        float selisih = buffer[i] - rataRata;
+        jumlahKuadrat += selisih * selisih;
+    }
+
+    return sqrt(jumlahKuadrat / jumlah);
+}
+```
+
+Penjelasan kode tambahan:
+
+1. `float hitungSimpanganBaku()` membuat fungsi yang menghasilkan nilai simpangan baku.
+2. `if (jumlah < 2) return 0.0` mengembalikan nol apabila data belum mencukupi untuk pengukuran penyebaran.
+3. Perulangan pertama menjumlahkan data pada buffer.
+4. `float rataRata = total / jumlah` menghitung rata-rata data.
+5. `float jumlahKuadrat = 0` menyiapkan variabel untuk menjumlahkan kuadrat selisih.
+6. Perulangan kedua menghitung selisih setiap data terhadap rata-rata.
+7. `selisih * selisih` menghitung kuadrat selisih.
+8. `jumlahKuadrat += selisih * selisih` mengumpulkan seluruh kuadrat selisih.
+9. `sqrt(jumlahKuadrat / jumlah)` menghitung akar rata-rata kuadrat selisih untuk mendapatkan simpangan baku populasi.
+
+Agar kode tersebut dapat dikompilasi, tambahkan:
+
+```cpp
+#include <math.h>
+```
+
+Nilai simpangan baku kemudian dapat ditampilkan di Serial Monitor setelah pemanggilan fungsi tersebut.
+
+Catatan: rumus di atas menghitung simpangan baku populasi dari sampel yang tersedia di buffer, yaitu dengan pembagi `jumlah`.
+
+---
+
+# 7. Hasil Percobaan
+
+Percobaan 5A dilakukan untuk menguji pengolahan data suhu menggunakan metode moving average serta pencatatan suhu minimum dan maksimum. Karena sensor DHT22 tidak tersedia, pengujian dilakukan menggunakan data dummy atau simulasi suhu.
+
+Pada pengujian simulasi, logika program untuk memasukkan data ke buffer, menghitung rata-rata bergerak, memperbarui nilai minimum dan maksimum, serta menampilkan hasil ke Serial Monitor dapat diuji tanpa pembacaan sensor fisik.
+
+Seluruh pengujian logika menggunakan data dummy berjalan lancar dan sesuai dengan perhitungan yang diharapkan. Namun, pembacaan langsung dari sensor DHT22 belum dapat diuji karena perangkat sensor tidak tersedia.
+
+---
+
+# 8. Analisis
+
+Berdasarkan pengujian menggunakan data dummy, metode moving average dapat digunakan untuk menghitung rata-rata dari data suhu yang tersimpan pada buffer. Penggunaan lima sampel membantu mengurangi fluktuasi data dibandingkan penggunaan satu pembacaan saja.
+
+Pencatatan nilai minimum dan maksimum memungkinkan program mengetahui rentang suhu yang muncul selama pengujian. Sementara itu, pemeriksaan `isnan()` berfungsi untuk mencegah data pembacaan yang tidak valid ikut diproses.
+
+Seluruh pengujian logika program dengan data simulasi berjalan lancar. Meskipun demikian, hasil pengujian ini belum membuktikan bahwa sensor DHT22 dapat dibaca dengan baik karena sensor tidak tersedia. Pengujian menggunakan perangkat fisik diperlukan untuk memastikan integrasi antara ESP32 dan DHT22 berjalan sesuai spesifikasi.
+
+---
+
+# 9. Kesimpulan
+
+Berdasarkan percobaan yang dilakukan, program Percobaan 5A dirancang untuk mengolah data suhu pada ESP32 menggunakan metode moving average dan pencatatan nilai minimum serta maksimum.
+
+Pengujian menggunakan data dummy berhasil digunakan untuk menguji logika perhitungan moving average, pengelolaan buffer, serta pembaruan nilai suhu minimum dan maksimum. Seluruh pengujian logika simulasi berjalan lancar.
+
+Karena sensor DHT22 tidak tersedia, pembacaan suhu dari perangkat fisik belum diuji. Oleh karena itu, keberhasilan yang diperoleh terbatas pada pengujian logika program menggunakan data simulasi.
+
+---
+
+# 10. Foto Percobaan
+
 
